@@ -1,0 +1,95 @@
+<p-toast position="bottom-right"></p-toast>
+
+<div class="ml-8 mr-8">
+<h1 class="m-0" style="font-weight: normal;">{{ tableConfig.title }}</h1>
+
+<p-toolbar styleClass="mt-4 mb-4">
+    <ng-template pTemplate="left">
+        <button pButton pRipple label="New" icon="pi pi-plus" class="p-button-success mr-2" (click)="openNew()"></button>
+        <button pButton pRipple label="Delete" icon="pi pi-trash" class="p-button-danger" (click)="deleteSelectedRows()" [disabled]="!selectedRows || !selectedRows.length"></button>
+    </ng-template>
+
+    <ng-template pTemplate="right">
+        <p-fileUpload mode="basic" accept="image/*" [maxFileSize]="1000000" label="Import" chooseLabel="Import" class="mr-2 inline-block" [disabled]="true"></p-fileUpload>
+        <button pButton pRipple label="Export" icon="pi pi-upload" class="p-button-help" [disabled]="true"></button>
+    </ng-template>
+</p-toolbar>
+
+<p-table #dt [value]="tableConfig.data" [rows]="tableConfig.rowsPerPage" [paginator]="true" styleClass="p-datatable-sm" responsiveLayout="scroll"
+          [globalFilterFields]="allowFilterRows"
+          [(selection)]="selectedRows" [rowHover]="true" dataKey="id"
+          currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries" [showCurrentPageReport]="true">
+  <ng-template pTemplate="caption">
+      <div class="flex align-items-center justify-content-between">
+          <h4 class="m-0">Manage {{tableConfig.title}}</h4>
+          <span class="p-input-icon-left">
+              <i class="pi pi-search"></i>
+              <input pInputText type="text" (input)="dt.filterGlobal($any($event.target).value, 'contains')" placeholder="Search..." />
+          </span>
+      </div>
+  </ng-template>
+  <ng-template pTemplate="header">
+      <tr>
+          <th style="width: 3rem">
+              <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+          </th>
+          <th *ngFor="let row of tableConfig.rows" [pSortableColumn]="row.allowFilter ? row.value : ''">{{row.label}}
+            <span *ngIf="row.allowFilter"><p-sortIcon [field]="row.value"></p-sortIcon></span>
+          </th>
+          <th></th>
+      </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-row>
+      <tr>
+          <td>
+              <p-tableCheckbox [value]="row"></p-tableCheckbox>
+          </td>
+          <ng-container *ngFor="let rowConfig of tableConfig.rows">
+            <td *ngIf="rowConfig.value == 'image'">
+              <img [src]="'../assets/images/' + row.image" [alt]="row.firstName" width="50" />
+            </td>
+            <td *ngIf="rowConfig.value != 'image'">
+              {{row[rowConfig.value]}}
+            </td>
+          </ng-container>
+          <td style="text-align: end;">
+            <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" (click)="editRow(row)"></button>
+            <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-warning mr-2" (click)="deleteRow(row)"></button>
+          </td>
+      </tr>
+  </ng-template>
+  <ng-template pTemplate="summary">
+      <div class="flex align-items-center justify-content-between">
+          In total there are {{tableConfig.data ? tableConfig.data.length : 0 }} {{ tableConfig.title | lowercase }}.
+      </div>
+  </ng-template>
+</p-table>
+</div>
+
+<p-dialog [(visible)]="createEditDialog" [style]="{width: '450px'}" header="Add {{ tableConfig.title }}" [modal]="true" styleClass="p-fluid">
+  <ng-template pTemplate="content">
+      <pre>{{ row | json }}</pre>
+      <!-- Display fields by type -->
+      <ng-container *ngFor="let field of tableConfig.rows">
+        <div class="field" *ngIf="field.type == 'text'">
+          <label for="name">{{field.label}}</label>
+          <input type="text" pInputText id="{{field.value}}" [(ngModel)]="row[field.value]" />
+          <small class="p-error" *ngIf="field.require && submitted && !row[field.value]">{{field.label}} is required.</small>
+        </div>
+        <div class="field" *ngIf="field.type == 'number'">
+          <label for="name">{{field.label}}</label>
+          <p-inputNumber [(ngModel)]="row[field.value]"></p-inputNumber>
+        </div>
+        <div class="field" *ngIf="field.type == 'file'">
+          <p-fileUpload mode="basic" accept="image/*" [maxFileSize]="1000000" [chooseLabel]="field.label" class="mr-2 inline-block"></p-fileUpload>
+        </div>
+      </ng-container>
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+      <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+      <button pButton pRipple label="Save" icon="pi pi-check" class="p-button-text"></button><!-- (click)="saveNewPerson() -->
+  </ng-template>
+</p-dialog>
+
+<p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>

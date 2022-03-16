@@ -1,0 +1,137 @@
+<p-toast position="bottom-right"></p-toast>
+<div class="card" style="padding: 2rem 5rem;">
+  <h1 class="m-0" style="font-weight: normal;">Employees</h1>
+  <p-toolbar styleClass="mt-4 mb-4">
+      <ng-template pTemplate="left">
+          <button pButton pRipple label="New" icon="pi pi-plus" class="p-button-success mr-2" (click)="openNew()"></button>
+          <button pButton pRipple label="Delete" icon="pi pi-trash" class="p-button-danger" (click)="deleteSelectedPeople()" [disabled]="!selectedPeople || !selectedPeople.length"></button>
+      </ng-template>
+
+      <ng-template pTemplate="right">
+          <p-fileUpload mode="basic" accept="image/*" [maxFileSize]="1000000" label="Import" chooseLabel="Import" class="mr-2 inline-block"></p-fileUpload>
+          <button pButton pRipple label="Export" icon="pi pi-upload" class="p-button-help"></button>
+      </ng-template>
+  </p-toolbar>
+
+  <p-table #dt [value]="people" [rows]="5" [paginator]="true" [globalFilterFields]="['firstName','lastName','email','department']" styleClass="p-datatable-sm" responsiveLayout="scroll"
+      [(selection)]="selectedPeople" [rowHover]="true" dataKey="id"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries" [showCurrentPageReport]="true">
+      <ng-template pTemplate="caption">
+          <div class="flex align-items-center justify-content-between">
+              <h4 class="m-0">Manage Employees</h4>
+              <span class="p-input-icon-left">
+                  <i class="pi pi-search"></i>
+                  <input pInputText type="text" (input)="dt.filterGlobal($any($event.target).value, 'contains')" placeholder="Search..." />
+              </span>
+          </div>
+      </ng-template>
+      <ng-template pTemplate="header">
+          <tr>
+              <th style="width: 3rem">
+                  <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+              </th>
+              <th>Image</th>
+              <th pSortableColumn="firstName">First Name <p-sortIcon field="firstName"></p-sortIcon></th>
+              <th pSortableColumn="lastName">Last Name <p-sortIcon field="lastName"></p-sortIcon></th>
+              <th pSortableColumn="email">E-mail <p-sortIcon field="email"></p-sortIcon></th>
+              <th pSortableColumn="department">Department <p-sortIcon field="department"></p-sortIcon></th>
+              <th></th>
+          </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-person>
+          <tr>
+              <td>
+                  <p-tableCheckbox [value]="person"></p-tableCheckbox>
+              </td>
+              <td>
+                  <img [src]="'../assets/images/' + person.image" [alt]="person.name" width="50" />
+                </td>
+              <td>{{person.firstName}}</td>
+              <td>{{person.lastName}}</td>
+              <td>{{person.email}}</td>
+              <td>{{person.department}}</td>
+              <td>
+                <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" (click)="editPerson(person)"></button>
+                <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-warning mr-2" (click)="deletePerson(person)"></button>
+              </td>
+          </tr>
+      </ng-template>
+      <ng-template pTemplate="summary">
+          <div class="flex align-items-center justify-content-between">
+              In total there are {{people ? people.length : 0 }} employees.
+          </div>
+      </ng-template>
+  </p-table>
+</div>
+
+<p-dialog [(visible)]="personDialog" [style]="{width: '450px'}" header="Add Employee" [modal]="true" styleClass="p-fluid">
+  <ng-template pTemplate="content">
+      <!-- <img [src]="'../assets/images/' + person.image" [alt]="person.firstName" class="product-image" *ngIf="person.image"> -->
+      <div class="field">
+          <label for="name">First Name</label>
+          <input type="text" pInputText id="name" [(ngModel)]="person.firstName" required autofocus />
+          <small class="p-error" *ngIf="submitted && !person.firstName">First Name is required.</small>
+      </div>
+      <div class="field">
+        <label for="name">Last Name</label>
+        <input type="text" pInputText id="lastname" [(ngModel)]="person.lastName" required />
+        <small class="p-error" *ngIf="submitted && !person.lastName">Last Name is required.</small>
+      </div>
+      <div class="field">
+        <label for="name">E-mail</label>
+        <input type="email" pInputText id="email" [(ngModel)]="person.email" />
+      </div>
+      <!-- <div class="field">
+          <label for="description">Last Name</label>
+          <textarea id="description" pInputTextarea [(ngModel)]="person.lastName" required rows="3" cols="20"></textarea>
+      </div> -->
+      <!-- <div class="field">
+          <label for="inventoryStatus">Inventory Status</label>
+          <p-dropdown [(ngModel)]="product.inventoryStatus" inputId="inventoryStatus" [options]="statuses" placeholder="Select">
+              <ng-template let-option pTemplate="item">
+                  <span [class]="'product-badge status-' + option.value">{{option.label}}</span>
+              </ng-template>
+          </p-dropdown>
+      </div> -->
+
+      <!-- <div class="field">
+          <label class="mb-3">Category</label>
+          <div class="formgrid grid">
+              <div class="field-radiobutton col-6">
+                  <p-radioButton id="category1" name="category" value="Accessories" [(ngModel)]="product.category"></p-radioButton>
+                  <label for="category1">Accessories</label>
+              </div>
+              <div class="field-radiobutton col-6">
+                  <p-radioButton id="category2" name="category" value="Clothing" [(ngModel)]="product.category"></p-radioButton>
+                  <label for="category2">Clothing</label>
+              </div>
+              <div class="field-radiobutton col-6">
+                  <p-radioButton id="category3" name="category" value="Electronics" [(ngModel)]="product.category"></p-radioButton>
+                  <label for="category3">Electronics</label>
+              </div>
+              <div class="field-radiobutton col-6">
+                  <p-radioButton id="category4" name="category" value="Fitness" [(ngModel)]="product.category"></p-radioButton>
+                  <label for="category4">Fitness</label>
+              </div>
+          </div>
+      </div> -->
+
+      <!-- <div class="formgrid grid">
+          <div class="field col">
+              <label for="price">Price</label>
+              <p-inputNumber id="price" [(ngModel)]="product.price" mode="currency" currency="USD" locale="en-US"></p-inputNumber>
+          </div>
+          <div class="field col">
+              <label for="quantity">Quantity</label>
+              <p-inputNumber id="quantity" [(ngModel)]="product.quantity"></p-inputNumber>
+          </div>
+      </div> -->
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+      <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+      <button pButton pRipple label="Save" icon="pi pi-check" class="p-button-text" (click)="saveNewPerson()"></button>
+  </ng-template>
+</p-dialog>
+
+<p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
